@@ -3,10 +3,8 @@ import os
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 import boto3
-from ec2_state import Ec2State
-from exceptions import DryRunFailException, Ec2ClientException
-
-load_dotenv() # .env 파일로부터 환경변수 로드
+from src.aws.ec2_state import Ec2State
+from src.aws.exceptions import DryRunFailException, Ec2ClientException
 
 class Ec2Handler:
     def __init__(self, instance_id):
@@ -80,6 +78,7 @@ class Ec2Handler:
             raise Ec2ClientException(str(e))
 
 if __name__ == "__main__":
+    load_dotenv()  # .env 파일로부터 환경변수 로드
     INSTANCE_ID = os.getenv('INSTANCE_ID')
     handler = Ec2Handler(INSTANCE_ID)
     state = handler.get_state()
