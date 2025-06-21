@@ -5,6 +5,9 @@ from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 import boto3
 
+from exceptions import DryRunFailException, Ec2ClientException
+
+
 class Ec2State(Enum):
     PENDING = 0
     RUNNING = 16
@@ -17,6 +20,13 @@ load_dotenv() # .env 파일로부터 환경변수 로드
 
 def get_state(client, instance_id):
     try:
+        response = client.describe_instances(InstanceIds=[instance_id], DryRun=True)
+    except ClientError as e:
+        if 'DryRunOperation' not in str(e):
+            raise DryRunFailException(str(e))
+    except Exception as e:
+        raise RuntimeError(str(e))
+    try:
         response = client.describe_instances(InstanceIds=[instance_id])
         """
             0 : Pending
@@ -28,7 +38,7 @@ def get_state(client, instance_id):
         """
         return Ec2State(response['Reservations'][0]['Instances'][0]['State']['Code'])
     except ClientError as e:
-        print(e)
+        raise Ec2ClientException(str(e))
 
 if __name__ == '__main__':
     INSTANCE_ID = os.getenv('INSTANCE_ID')
