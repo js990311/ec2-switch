@@ -1,12 +1,9 @@
-import os
-from dotenv import load_dotenv
-
-from src.aws.ec2_handler import Ec2Handler
+from src.aws.ec2_handler_factory import ec2_handler_factory
 from src.gui.app_view import AppView
+from src.utils.config_manager import load_config_file, get_path
 
 if __name__ == "__main__":
-    load_dotenv()  # .env 파일로부터 환경변수 로드
-    INSTANCE_ID = os.getenv('INSTANCE_ID')
-    handler = Ec2Handler(INSTANCE_ID)
-    app = AppView(handler)
+    config = load_config_file()
+    ec2Handler = ec2_handler_factory(config)
+    app = AppView(ec2Handler)
     app.mainloop()

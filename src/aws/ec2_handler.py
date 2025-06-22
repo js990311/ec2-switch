@@ -7,20 +7,20 @@ from src.aws.ec2_state import Ec2State
 from src.aws.exceptions import DryRunFailException, Ec2ClientException
 
 class Ec2Handler:
-    def __init__(self, instance_id):
-        self.ec2 = boto3.client('ec2')
+    def __init__(self, client, instance_id):
+        self.client = client
         self.instace_id = instance_id
 
     def get_state(self):
         try:
-            response = self.ec2.describe_instances(InstanceIds=[self.instace_id], DryRun=True)
+            response = self.client.describe_instances(InstanceIds=[self.instace_id], DryRun=True)
         except ClientError as e:
             if 'DryRunOperation' not in str(e):
                 raise DryRunFailException(str(e))
         except Exception as e:
             raise RuntimeError(str(e))
         try:
-            response = self.ec2.describe_instances(InstanceIds=[self.instace_id])
+            response = self.client.describe_instances(InstanceIds=[self.instace_id])
             """
                 0 : Pending
                 16 : running
@@ -62,7 +62,7 @@ class Ec2Handler:
         except Exception as e:
             raise e
         try:
-            self.ec2.stop_instances(InstanceIds=[self.instace_id], DryRun=True)
+            self.client.stop_instances(InstanceIds=[self.instace_id], DryRun=True)
         except ClientError as e:
             if 'DryRunOperation' not in str(e):
                 raise DryRunFailException(str(e))
@@ -72,7 +72,7 @@ class Ec2Handler:
         if(state == Ec2State.STOPPED or state == Ec2State.STOPPING):
             return False
         try:
-            self.ec2.stop_instances(InstanceIds=[self.instace_id], DryRun=False)
+            self.client.stop_instances(InstanceIds=[self.instace_id], DryRun=False)
             return True
         except Exception as e:
             raise Ec2ClientException(str(e))

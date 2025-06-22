@@ -1,2 +1,5 @@
 .idea
 .env
+config.json
+build/
+dist/
