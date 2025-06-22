@@ -40,7 +40,7 @@ class Ec2Handler:
         except Exception as e:
             raise e
         try:
-            self.ec2.start_instances(InstanceIds=[self.instace_id], DryRun=True)
+            self.client.start_instances(InstanceIds=[self.instace_id], DryRun=True)
         except ClientError as e:
             if 'DryRunOperation' not in str(e):
                 raise DryRunFailException(str(e))
@@ -50,7 +50,7 @@ class Ec2Handler:
         if (state == Ec2State.RUNNING or state == Ec2State.PENDING):
             return False
         try:
-            self.ec2.start_instances(InstanceIds=[self.instace_id], DryRun=False)
+            self.client.start_instances(InstanceIds=[self.instace_id], DryRun=False)
             return True
         except Exception as e:
             raise Ec2ClientException(str(e))
